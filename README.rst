@@ -29,7 +29,7 @@ Example
             self.logger.info('Processing %s', num)
             self.sum += num
 
-        def finish(self):
+        def shutdown(self):
             self.logger.info('Sum %d', self.sum)
 
 

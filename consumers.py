@@ -33,8 +33,8 @@ class Consumer(multiprocessing.Process):
         """Process an item from the queue."""
         raise NotImplementedError
 
-    def finish(self):
-        """Finish the consumer."""
+    def shutdown(self):
+        """Run when the consumer is shutting down."""
         pass
 
     def run(self):
@@ -49,7 +49,7 @@ class Consumer(multiprocessing.Process):
                 self.logger.exception(exception)
                 raise
 
-        self.finish()
+        self.shutdown()
 
 
 class Queue:
