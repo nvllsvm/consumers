@@ -1,6 +1,12 @@
 consumers
 =========
 
+.. image:: https://img.shields.io/pypi/v/consumers.svg
+    :target: https://pypi.python.org/pypi/consumers
+
+.. image:: https://img.shields.io/pypi/l/consumers.svg
+    :target: https://pypi.python.org/pypi/consumers
+
 Consumers is a simple, flexible way to parallelize processing in Python.
 
 Example
