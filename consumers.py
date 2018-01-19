@@ -29,7 +29,7 @@ class Consumer(multiprocessing.Process):
         """Initialize the consumer."""
         pass
 
-    def process_item(self, *args, **kwargs):
+    def process(self, *args, **kwargs):
         """Process an item from the queue."""
         raise NotImplementedError
 
@@ -44,7 +44,7 @@ class Consumer(multiprocessing.Process):
                 item = self.queue.get(True)
                 if item == STATUS_DONE:
                     break
-                self.process_item(*item['args'], **item['kwargs'])
+                self.process(*item['args'], **item['kwargs'])
             except Exception as exception:
                 self.logger.exception(exception)
                 raise
@@ -100,7 +100,7 @@ class Queue:
 
     def put(self, *args, **kwargs):
         """Enqueue a pair `*args` and `**kwargs` to be passed to a consumer's
-        :py:method:`consumers.Consumer.process_item` method.
+        :py:method:`consumers.Consumer.process` method.
         """
         self._queue.put({
             'args': args,

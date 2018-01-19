@@ -25,7 +25,7 @@ Example
         def initialize(self):
             self.sum = 0
 
-        def process_item(self, num):
+        def process(self, num):
             self.logger.info('Processing %s', num)
             self.sum += num
 
