@@ -20,13 +20,13 @@ class QueueError(Exception):
 class Process(multiprocessing.Process):
     """Base process class."""
 
-    def __init__(self, queue):
+    def __init__(self, queue, process_number):
         super().__init__()
         self.queue = queue
         self.consumer = self.queue.consumer(*self.queue.init_args,
                                             **self.queue.init_kwargs)
         self.name = '{}-{}'.format(self.queue.consumer.__name__,
-                                   self.name.split('-', 1)[1])
+                                   process_number)
         self.logger = logging.getLogger(self.name)
         self.consumer._process_init(self.name, self.logger)
 
@@ -96,8 +96,8 @@ class Queue:
         """Start the consumers."""
         self._active = True
 
-        for _ in range(self.quantity):
-            process = Process(self)
+        for process_number in range(1, self.quantity + 1):
+            process = Process(self, process_number)
             process.start()
             self.processes.append(process)
 
