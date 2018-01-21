@@ -94,6 +94,9 @@ class Queue:
 
     def start(self):
         """Start the consumers."""
+        if self._active:
+            raise QueueError
+
         self._active = True
 
         for process_number in range(1, self.quantity + 1):
@@ -103,6 +106,9 @@ class Queue:
 
     def stop(self):
         """Stop the consumers."""
+        if not self._active:
+            raise QueueError
+
         self.set_done()
 
         while True:
