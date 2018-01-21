@@ -70,10 +70,10 @@ class Queue:
     PROCESS_ALIVE_TIMEOUT = 0.1
     """Time between loops when checking if all processes are done."""
 
-    def __init__(self, consumer, num_consumers=multiprocessing.cpu_count()):
+    def __init__(self, consumer, quantity=multiprocessing.cpu_count()):
         self.logger = logging.getLogger(__name__)
         self.consumer = consumer
-        self.num_consumers = num_consumers
+        self.quantity = quantity
         self.processes = []
         self._queue = multiprocessing.Queue()
 
@@ -87,7 +87,7 @@ class Queue:
 
     def __enter__(self):
         """Start the consumers upon entering a runtime context."""
-        for _ in range(self.num_consumers):
+        for _ in range(self.quantity):
             process = Process(self._queue, self.consumer,
                               self.init_args, self.init_kwargs)
             process.start()
