@@ -85,18 +85,16 @@ class Queue:
             self.init_args = consumer.init_args
             self.init_kwargs = consumer.init_kwargs
 
-    def __enter__(self):
-        """Start the consumers upon entering a runtime context."""
+    def start(self):
+        """Start the consumers."""
         for _ in range(self.quantity):
             process = Process(self._queue, self.consumer,
                               self.init_args, self.init_kwargs)
             process.start()
             self.processes.append(process)
 
-        return self
-
-    def __exit__(self, *args):
-        """Cleanup the consumers upon exiting a runtime context."""
+    def stop(self):
+        """Stop the consumers."""
         self.set_done()
 
         while True:
@@ -113,6 +111,15 @@ class Queue:
 
         if consumer_error:
             raise ConsumerError
+
+    def __enter__(self):
+        """Start the consumers upon entering a runtime context."""
+        self.start()
+        return self
+
+    def __exit__(self, *args):
+        """Cleanup the consumers upon exiting a runtime context."""
+        self.stop()
 
     def put(self, *args, **kwargs):
         """Enqueue a pair `*args` and `**kwargs` to be passed to a consumer's
