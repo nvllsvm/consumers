@@ -13,14 +13,20 @@ class ConsumerError(Exception):
     """An exception in a consumer occurred."""
 
 
+class QueueError(Exception):
+    """An error occurred accessing a queue."""
+
+
 class Process(multiprocessing.Process):
     """Base process class."""
 
-    def __init__(self, queue, consumer, init_args, init_kwargs):
+    def __init__(self, queue):
         super().__init__()
         self.queue = queue
-        self.consumer = consumer(*init_args, **init_kwargs)
-        self.name = consumer.__name__ + '-' + self.name.split('-', 1)[1]
+        self.consumer = self.queue.consumer(*self.queue.init_args,
+                                            **self.queue.init_kwargs)
+        self.name = '{}-{}'.format(self.queue.consumer.__name__,
+                                   self.name.split('-', 1)[1])
         self.logger = logging.getLogger(self.name)
         self.consumer._process_init(self.name, self.logger)
 
@@ -28,7 +34,7 @@ class Process(multiprocessing.Process):
         """Consume events from the queue"""
         while True:
             try:
-                item = self.queue.get(True)
+                item = self.queue.get()
                 if item == STATUS_DONE:
                     break
                 self.consumer.process(*item['args'], **item['kwargs'])
@@ -76,6 +82,7 @@ class Queue:
         self.quantity = quantity
         self.processes = []
         self._queue = multiprocessing.Queue()
+        self._active = False
 
         if isinstance(consumer, type):
             self.init_args = ()
@@ -87,9 +94,10 @@ class Queue:
 
     def start(self):
         """Start the consumers."""
+        self._active = True
+
         for _ in range(self.quantity):
-            process = Process(self._queue, self.consumer,
-                              self.init_args, self.init_kwargs)
+            process = Process(self)
             process.start()
             self.processes.append(process)
 
@@ -121,10 +129,20 @@ class Queue:
         """Cleanup the consumers upon exiting a runtime context."""
         self.stop()
 
+    def get(self):
+        """Get an item from the queue."""
+        if not self._active:
+            raise QueueError
+
+        return self._queue.get(True)
+
     def put(self, *args, **kwargs):
         """Enqueue a pair `*args` and `**kwargs` to be passed to a consumer's
         :py:method:`consumers.Consumer.process` method.
         """
+        if not self._active:
+            raise QueueError
+
         self._queue.put({
             'args': args,
             'kwargs': kwargs})
@@ -133,5 +151,10 @@ class Queue:
         """Enqueue a signal to inform consumers that no more data will be added
         to the queue.
         """
+        if not self._active:
+            raise QueueError
+
+        self._active = False
+
         for _ in self.processes:
             self._queue.put(STATUS_DONE)
