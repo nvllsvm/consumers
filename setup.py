@@ -10,7 +10,7 @@ setuptools.setup(
     author_email='arabert@nullsum.net',
     url='https://github.com/nvllsvm/consumers',
     license='Apache 2.0',
-    py_modules=['consumers'],
+    packages=['consumers'],
     classifiers=(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
