@@ -1,11 +1,7 @@
 consumers
 =========
 
-.. image:: https://img.shields.io/pypi/v/consumers.svg
-    :target: https://pypi.python.org/pypi/consumers
-
-.. image:: https://img.shields.io/pypi/l/consumers.svg
-    :target: https://pypi.python.org/pypi/consumers
+|Version| |Status| |License|
 
 Consumers is a simple, flexible way to parallelize processing in Python.
 
@@ -102,3 +98,13 @@ A system with two virtual CPUs will output log entries for two instances of
     INFO:SquareConsumer-1:Square of 4 is 16
     INFO:SumConsumer-1:Processing 16
     INFO:SumConsumer-1:Sum 30
+
+
+.. |Version| image:: https://img.shields.io/pypi/v/consumers.svg?
+   :target: https://pypi.python.org/pypi/consumers
+
+.. |Status| image:: https://img.shields.io/travis/nvllsvm/consumers.svg?
+   :target: https://travis-ci.org/nvllsvm/consumers
+
+.. |License| image:: https://img.shields.io/github/license/nvllsvm/consumers.svg?
+   :target: https://github.com/nvllsvm/consumers
