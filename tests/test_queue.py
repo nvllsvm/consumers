@@ -51,6 +51,14 @@ class TestInit:
 
         assert q.quantity == cpu_count
 
+    def test_queues_default(self):
+        q = queue.Queue(consumer.Consumer)
+        assert q._queues == ()
+
+    def test_queues_kwarg(self):
+        q = queue.Queue(consumer.Consumer, queues=[1, 2, 3])
+        assert q._queues == [1, 2, 3]
+
 
 class TestContextManager:
 
@@ -97,6 +105,57 @@ class TestStart:
         for num, process in enumerate(q.processes):
             assert process.queue == q
             assert process.process_number == num + 1
+
+    @mock.patch.object(queue._Process, 'start')
+    def test_starts_parent_queues(self, mock_process):
+        manager = mock.Mock()
+        manager.attach_mock(mock_process, 'process_start')
+
+        queues = []
+        for i in range(3):
+            pq = queue.Queue(consumer.Consumer)
+            pq.start = mock.Mock()
+            queues.append(pq)
+            manager.attach_mock(pq.start, 'parent{}'.format(i))
+
+        q = queue.Queue(consumer.Consumer, queues=queues, quantity=1)
+        q.start()
+        q.stop()
+
+        assert manager.mock_calls == [
+            mock.call.parent0(),
+            mock.call.parent1(),
+            mock.call.parent2(),
+            mock.call.process_start()]
+
+    @mock.patch.object(queue._Process, 'start')
+    def test_starts_parent_queueerror(self, mock_process):
+        manager = mock.Mock()
+        manager.attach_mock(mock_process, 'process_start')
+
+        pq = queue.Queue(consumer.Consumer)
+        pq.start = mock.Mock(side_effect=exceptions.QueueError)
+        manager.attach_mock(pq.start, 'parent_start')
+
+        q = queue.Queue(consumer.Consumer, queues=[pq], quantity=1)
+        q.start()
+        q.stop()
+
+        assert manager.mock_calls == [
+            mock.call.parent_start(),
+            mock.call.process_start()]
+
+    @mock.patch.object(queue._Process, 'start')
+    def test_starts_parent_exception(self, mock_process):
+        pq = queue.Queue(consumer.Consumer)
+        pq.start = mock.Mock(side_effect=ValueError)
+
+        q = queue.Queue(consumer.Consumer, queues=[pq], quantity=1)
+
+        with pytest.raises(ValueError):
+            q.start()
+
+        mock_process.assert_not_called()
 
 
 class TestStop:
@@ -239,3 +298,47 @@ class TestWaitUntilDone:
         with pytest.raises(exceptions.ConsumerError):
             with q:
                 q.put()
+
+    @mock.patch.object(queue._Process, 'is_alive')
+    @mock.patch.object(queue._Process, 'start')
+    def test_stops_queues(self, mock_start, mock_alive):
+        mock_alive.return_value = False
+
+        manager = mock.Mock()
+        manager.attach_mock(mock_alive, 'is_alive')
+
+        queues = []
+        for i in range(3):
+            pq = queue.Queue(consumer.Consumer)
+            pq.stop = mock.Mock()
+            manager.attach_mock(pq.stop, 'parent{}'.format(i))
+            queues.append(pq)
+
+        q = queue.Queue(consumer.Consumer, quantity=1, queues=queues)
+        q.start()
+        q.stop()
+
+        assert manager.mock_calls == [
+            mock.call.is_alive(),
+            mock.call.parent0(),
+            mock.call.parent1(),
+            mock.call.parent2()]
+
+    @mock.patch.object(queue._Process, 'start')
+    def test_stops_parent_queueerror(self, _):
+        pq = queue.Queue(consumer.Consumer)
+        pq.stop = mock.Mock(side_effect=exceptions.QueueError)
+
+        q = queue.Queue(consumer.Consumer, quantity=1, queues=[pq])
+        q.start()
+        q.stop()
+
+    @mock.patch.object(queue._Process, 'start')
+    def test_stops_parent_consumererror(self, _):
+        pq = queue.Queue(consumer.Consumer)
+        pq.stop = mock.Mock(side_effect=exceptions.ConsumerError)
+
+        q = queue.Queue(consumer.Consumer, quantity=1, queues=[pq])
+        q.start()
+        with pytest.raises(exceptions.ConsumerError):
+            q.stop()

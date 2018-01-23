@@ -28,8 +28,8 @@ class SumConsumer(Consumer):
 
 
 sum_queue = Queue(SumConsumer, quantity=1)
-square_queue = Queue(SquareConsumer(sum_queue))
+square_queue = Queue(SquareConsumer(sum_queue), queues=[sum_queue])
 
-with sum_queue, square_queue:
+with square_queue:
     for i in range(5):
         square_queue.put(i)

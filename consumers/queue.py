@@ -46,12 +46,13 @@ class Queue:
     PROCESS_ALIVE_TIMEOUT = 0.1
     """Time between loops when checking if all processes are done."""
 
-    def __init__(self, consumer, quantity=None):
+    def __init__(self, consumer, quantity=None, queues=None):
         self.logger = logging.getLogger(__name__)
         self.quantity = quantity or multiprocessing.cpu_count()
         self.processes = []
         self._queue = multiprocessing.Queue()
         self._active = False
+        self._queues = queues or ()
 
         if isinstance(consumer, type):
             self.consumer = consumer
@@ -70,6 +71,12 @@ class Queue:
         """Start the consumers."""
         self._assert_active_state(False)
         self._active = True
+
+        for queue in self._queues:
+            try:
+                queue.start()
+            except exceptions.QueueError:  # queue already running
+                pass
 
         for process_number in range(1, self.quantity + 1):
             process = _Process(self, process_number)
@@ -107,6 +114,15 @@ class Queue:
                 consumer_error = True
                 self.logger.error('%s exited with %d', consumer.name,
                                   consumer.exitcode)
+
+        for queue in self._queues:
+            try:
+                queue.stop()
+            except exceptions.ConsumerError:
+                # raised later so we can ensure all queues get stopped
+                consumer_error = True
+            except exceptions.QueueError:
+                pass
 
         if consumer_error:
             raise exceptions.ConsumerError
