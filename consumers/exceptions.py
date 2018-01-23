@@ -1,3 +1,9 @@
+"""
+Exceptions
+==========
+"""
+
+
 class ConsumerError(Exception):
     """An exception in a consumer occurred."""
 

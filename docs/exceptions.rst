@@ -1,0 +1,2 @@
+.. automodule:: consumers.exceptions
+    :members:
