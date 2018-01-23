@@ -9,17 +9,13 @@ from consumers import consumer, queue
 
 class TestInit:
 
-    @mock.patch.object(consumer.Consumer, '_process_init')
-    def test_init(self, mock_process_init):
+    def test_init(self):
+        process_number = 4
+
         class TestConsumer(consumer.Consumer):
             pass
 
-        args = (1, 2, 3)
-        kwargs = {'a': 'one',
-                  'b': 'two'}
-
-        q = queue.Queue(TestConsumer(*args, **kwargs))
-        process_number = 4
+        q = queue.Queue(TestConsumer)
 
         p = queue._Process(q, process_number)
 
@@ -27,27 +23,30 @@ class TestInit:
 
         assert p.queue == q
         assert p.process_number == process_number
-        assert type(p.consumer) == q.consumer
-        assert p.consumer.init_args == q.init_args
-        assert p.consumer.init_kwargs == q.init_kwargs
         assert p.name == 'TestConsumer-4'
         assert type(p.logger) == logging.Logger
         assert p.logger.name == p.name
-        mock_process_init.assert_called_once_with(p.name, p.logger)
 
 
 class TestRun:
 
     @mock.patch.object(consumer.Consumer, 'shutdown')
     @mock.patch.object(consumer.Consumer, 'process')
+    @mock.patch.object(consumer.Consumer, '_process_init')
     @mock.patch.object(queue.Queue, 'get')
-    def test_calls(self, mock_get, mock_process, mock_shutdown):
+    def test_calls(self, mock_get, mock_process_init, mock_process,
+                   mock_shutdown):
         manager = mock.Mock()
         manager.attach_mock(mock_get, 'get')
+        manager.attach_mock(mock_process_init, 'process_init')
         manager.attach_mock(mock_process, 'process')
         manager.attach_mock(mock_shutdown, 'shutdown')
 
-        q = queue.Queue(consumer.Consumer, quantity=1)
+        args = (1, 2, 3)
+        kwargs = {'a': 'one',
+                  'b': 'two'}
+
+        q = queue.Queue(consumer.Consumer(*args, **kwargs), quantity=1)
 
         manager.get.side_effect = [
             {'args': (1, 2), 'kwargs': {'a': 'b', 'c': 'd'}},
@@ -58,7 +57,10 @@ class TestRun:
         p = queue._Process(q, 1)
         p.run()
 
+        mock_process_init.assert_called_once_with(p.name, p.logger)
+
         assert manager.mock_calls == [
+            mock.call.process_init(p.name, p.logger),
             mock.call.get(),
             mock.call.process(1, 2, a='b', c='d'),
             mock.call.get(),

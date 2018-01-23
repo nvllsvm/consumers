@@ -18,26 +18,25 @@ class _Process(multiprocessing.Process):
         super().__init__()
         self.queue = queue
         self.process_number = process_number
-        self.consumer = self.queue.consumer(*self.queue.init_args,
-                                            **self.queue.init_kwargs)
         self.name = '{}-{}'.format(self.queue.consumer.__name__,
                                    self.process_number)
         self.logger = logging.getLogger(self.name)
-        self.consumer._process_init(self.name, self.logger)
 
     def run(self):
         """Consume events from the queue"""
+        consumer = self.queue.consumer(*self.queue.init_args,
+                                       **self.queue.init_kwargs)
+        consumer._process_init(self.name, self.logger)
         while True:
             try:
                 item = self.queue.get()
                 if item == STATUS_DONE:
                     break
-                self.consumer.process(*item['args'], **item['kwargs'])
+                consumer.process(*item['args'], **item['kwargs'])
             except Exception as exception:
                 self.logger.exception(exception)
                 raise
-
-        self.consumer.shutdown()
+        consumer.shutdown()
 
 
 class Queue:
