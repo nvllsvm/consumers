@@ -250,7 +250,8 @@ class TestResults:
                 time.sleep(0.1)
 
             def shutdown(self):
-                return self.square
+                if hasattr(self, 'square'):
+                    return self.square
 
         q = queue.Queue(SquareConsumer, quantity=2)
 
@@ -265,4 +266,4 @@ class TestResults:
         with q:
             pass
 
-        assert q.results == []
+        assert q.results == [None, None]
