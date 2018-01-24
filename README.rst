@@ -76,9 +76,9 @@ Orchestrating multiple types of consumers to achieve a single solution.
 
 
     sum_queue = Queue(SumConsumer, quantity=1)
-    square_queue = Queue(SquareConsumer(sum_queue), queues=[sum_queue])
+    square_queue = Queue(SquareConsumer(sum_queue))
 
-    with square_queue:
+    with sum_queue, square_queue:
         for i in range(5):
             square_queue.put(i)
 
