@@ -47,4 +47,4 @@ https://consumers.readthedocs.io
    :target: https://travis-ci.org/nvllsvm/consumers
 
 .. |License| image:: https://img.shields.io/github/license/nvllsvm/consumers.svg?
-   :target: https://github.com/nvllsvm/consumers
+   :target: https://github.com/nvllsvm/consumers/blob/master/LICENSE
