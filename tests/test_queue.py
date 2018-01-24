@@ -239,3 +239,30 @@ class TestWaitUntilDone:
         with pytest.raises(exceptions.ConsumerError):
             with q:
                 q.put()
+
+
+class TestResults:
+
+    def test_gets_results(self):
+        class SquareConsumer(consumer.Consumer):
+            def process(self, item):
+                self.square = item * item
+                time.sleep(0.1)
+
+            def shutdown(self):
+                return self.square
+
+        q = queue.Queue(SquareConsumer, quantity=2)
+
+        with q:
+            q.put(2)
+            q.put(4)
+
+        assert type(q.results) == list
+        assert len(q.results) == 2
+        assert set(q.results) == {4, 16}
+
+        with q:
+            pass
+
+        assert q.results == []

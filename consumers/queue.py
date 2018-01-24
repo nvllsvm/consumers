@@ -36,7 +36,8 @@ class _Process(multiprocessing.Process):
             except Exception as exception:
                 self.logger.exception(exception)
                 raise
-        consumer.shutdown()
+        result = consumer.shutdown()
+        self.queue._result_queue.put({'result': result})
 
 
 class Queue:
@@ -50,6 +51,7 @@ class Queue:
         self.quantity = quantity or multiprocessing.cpu_count()
         self.processes = []
         self._queue = multiprocessing.Queue()
+        self._result_queue = multiprocessing.Queue()
         self._active = False
 
         if isinstance(consumer, type):
@@ -69,6 +71,8 @@ class Queue:
         """Start the consumers."""
         self._assert_active_state(False)
         self._active = True
+
+        self.results = []
 
         for process_number in range(1, self.quantity + 1):
             process = _Process(self, process_number)
@@ -99,6 +103,13 @@ class Queue:
             if not any(c.is_alive() for c in self.processes):
                 break
             time.sleep(self.PROCESS_ALIVE_TIMEOUT)
+
+        self._result_queue.put(STATUS_DONE)
+        while True:
+            item = self._result_queue.get(True)
+            if item == STATUS_DONE:
+                break
+            self.results.append(item['result'])
 
         consumer_error = False
         for consumer in self.processes:
