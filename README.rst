@@ -5,6 +5,11 @@ consumers
 
 Consumers is a simple, flexible way to parallelize processing in Python.
 
+Documentation
+-------------
+https://consumers.readthedocs.io
+
+
 Example
 -------
 
@@ -12,32 +17,27 @@ Example
 
     from consumers import Consumer, Queue
 
-    class SumConsumer(Consumer):
+    class Concatenator(Consumer):
         def initialize(self):
-            self.sum = 0
+            self.string = ''
 
-        def process(self, num):
-            self.sum += num
+        def process(self, letter:
+            self.string += letter
 
         def shutdown(self):
-            return self.sum
+            return self.string
 
-    with Queue(SumConsumer) as queue:
-        for i in range(5):
+    with Queue(Concatenator, quantity=2) as queue:
+        for i in 'abcdef':
             queue.put(i)
 
     print(queue.results)
 
-A system with two virtual CPUs will have two results.
+**Output**
 
 ::
 
-    [4, 6]
-
-
-Documentation
--------------
-https://consumers.readthedocs.io
+    ['bce', 'adf']
 
 
 .. |Version| image:: https://img.shields.io/pypi/v/consumers.svg?
