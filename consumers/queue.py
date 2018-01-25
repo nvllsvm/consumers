@@ -23,13 +23,12 @@ class _Process(multiprocessing.Process):
         self.logger = logging.getLogger(self.name)
 
     def run(self):
-        """Consume events from the queue"""
         consumer = self.queue.consumer(*self.queue.init_args,
                                        **self.queue.init_kwargs)
         consumer._process_init(self.name, self.logger)
         while True:
             try:
-                item = self.queue.get()
+                item = self.queue._get()
                 if item == STATUS_DONE:
                     break
                 consumer.process(*item['args'], **item['kwargs'])
@@ -41,9 +40,29 @@ class _Process(multiprocessing.Process):
 
 
 class Queue:
-    """A queue with consumers."""
+    """A queue with consumers.
 
-    PROCESS_ALIVE_TIMEOUT = 0.1
+    Can be used as a context manager to invoke :py:meth:`consumers.Queue.start`
+    and :py:meth:`consumers.Queue.stop` at the beginning and end of a context
+    respectively.
+
+    :param type,consumers.Consumer consumer:
+        The consumer class to use when processing the queue.
+
+        When an instance is passed, any parameters
+        passed to the constructor will be passed to the
+        :py:meth:`consumer.Consumer.initialize` method when creating the
+        consumer processes.
+
+        When a class type is passed, the consumers will be initialized with no
+        parameters.
+
+    :param int quantity:
+        The number of consumers to create. Defaults to the number of virtual
+        CPUs.
+    """
+
+    _PROCESS_ALIVE_TIMEOUT = 0.1
     """Time between loops when checking if all processes are done."""
 
     def __init__(self, consumer, quantity=None):
@@ -53,6 +72,7 @@ class Queue:
         self._queue = multiprocessing.Queue()
         self._result_queue = multiprocessing.Queue()
         self._active = False
+        self._results = None
 
         if isinstance(consumer, type):
             self.consumer = consumer
@@ -68,11 +88,14 @@ class Queue:
             raise exceptions.QueueError
 
     def start(self):
-        """Start the consumers."""
+        """Start the consumers.
+
+        :raises consumers.QueueError: The consumers have already been started.
+        """
         self._assert_active_state(False)
         self._active = True
 
-        self.results = []
+        self._results = None
 
         for process_number in range(1, self.quantity + 1):
             process = _Process(self, process_number)
@@ -80,7 +103,17 @@ class Queue:
             self.processes.append(process)
 
     def stop(self):
-        """Stop the consumers."""
+        """Stop the consumers.
+
+        This method waits for the queue to completely drain before stopping
+        the consumers. Any results returned from the consumers will be
+        collected and be made available in the queue's
+        :py:attr:`consumers.Queue.results` attribute.
+
+        :raises consumers.ConsumerError: An unhandled exception was raised
+            in one or more of the consumers while processing.
+        :raises consumers.QueueError: The consumers have already been stopped.
+        """
         self._assert_active_state(True)
         self._set_done()
         self._wait_until_done()
@@ -102,14 +135,16 @@ class Queue:
         while True:
             if not any(c.is_alive() for c in self.processes):
                 break
-            time.sleep(self.PROCESS_ALIVE_TIMEOUT)
+            time.sleep(self._PROCESS_ALIVE_TIMEOUT)
 
         self._result_queue.put(STATUS_DONE)
+        results = []
         while True:
             item = self._result_queue.get(True)
             if item == STATUS_DONE:
                 break
-            self.results.append(item['result'])
+            results.append(item['result'])
+        self._results = results
 
         consumer_error = False
         for consumer in self.processes:
@@ -130,17 +165,33 @@ class Queue:
         """Cleanup the consumers upon exiting a runtime context."""
         self.stop()
 
-    def get(self):
+    def _get(self):
         """Get an item from the queue."""
         self._assert_active_state(True)
         return self._queue.get(True)
 
     def put(self, *args, **kwargs):
-        """
-        Enqueue a pair `*args` and `**kwargs` to be passed to a consumer's
-        :py:method:`consumers.Consumer.process` method.
+        """Enqueue a single item for processing.
+
+        The :py:meth:`consumers.Consumer.process` method will be called with
+        any parameters passed to this method.
         """
         self._assert_active_state(True)
         self._queue.put({
             'args': args,
             'kwargs': kwargs})
+
+    @property
+    def results(self):
+        """Results from the consumers.
+
+        Reset when consumers are started.
+
+        :rtype: list
+
+        :raises consumers.QueueError: Results are not available.
+        """
+        if self._results is None:
+            raise exceptions.QueueError
+
+        return self._results

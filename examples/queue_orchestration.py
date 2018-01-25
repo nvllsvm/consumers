@@ -1,4 +1,5 @@
 import logging
+import time
 
 from consumers import Consumer, Queue
 
@@ -14,6 +15,9 @@ class SquareConsumer(Consumer):
         self.logger.info('Square of %d is %d', num, square)
         self.sum_queue.put(square)
 
+        # Added to demonstrate SumConsumer working in parallel
+        time.sleep(0.1)
+
 
 class SumConsumer(Consumer):
     def initialize(self):
@@ -28,7 +32,7 @@ class SumConsumer(Consumer):
 
 
 sum_queue = Queue(SumConsumer, quantity=1)
-square_queue = Queue(SquareConsumer(sum_queue))
+square_queue = Queue(SquareConsumer(sum_queue), quantity=2)
 
 with sum_queue, square_queue:
     for i in range(5):

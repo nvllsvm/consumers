@@ -3,6 +3,7 @@ Changelog
 
 Next
 ----
+- Added API documentation and examples
 - Added queue results.
 - Removed mechanism for queues to manage related queues.
 
