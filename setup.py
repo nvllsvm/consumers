@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='consumers',
-    version='0.2.1',
+    version='0.3.0',
     description='A simple, flexible way to parallelize processing in Python.',
     long_description=open('README.rst').read(),
     author='Andrew Rabert',

@@ -1,9 +1,8 @@
 Changelog
 =========
 
-Next
-----
-- Added API documentation and examples
+0.3.0 (2018-01-25)
+------------------
 - Added queue results.
 - Removed mechanism for queues to manage related queues.
 
