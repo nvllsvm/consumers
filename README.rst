@@ -21,7 +21,7 @@ Example
         def initialize(self):
             self.string = ''
 
-        def process(self, letter:
+        def process(self, letter):
             self.string += letter
 
         def shutdown(self):

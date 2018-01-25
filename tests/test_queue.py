@@ -136,7 +136,7 @@ class TestGet:
         manager.attach_mock(mock_assert_state, '_assert_active_state')
         manager.attach_mock(q._queue.get, 'get')
 
-        assert expected == q.get()
+        assert expected == q._get()
         assert manager.mock_calls == [
             mock.call._assert_active_state(True),
             mock.call.get(True)]

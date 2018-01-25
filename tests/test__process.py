@@ -33,7 +33,7 @@ class TestRun:
     @mock.patch.object(consumer.Consumer, 'shutdown')
     @mock.patch.object(consumer.Consumer, 'process')
     @mock.patch.object(consumer.Consumer, '_process_init')
-    @mock.patch.object(queue.Queue, 'get')
+    @mock.patch.object(queue.Queue, '_get')
     def test_calls(self, mock_get, mock_process_init, mock_process,
                    mock_shutdown):
         manager = mock.Mock()
@@ -71,7 +71,7 @@ class TestRun:
 
     @mock.patch.object(consumer.Consumer, 'shutdown')
     @mock.patch.object(consumer.Consumer, 'process')
-    @mock.patch.object(queue.Queue, 'get')
+    @mock.patch.object(queue.Queue, '_get')
     def test_exception(self, mock_get, mock_process, mock_shutdown):
         q = queue.Queue(consumer.Consumer)
         p = queue._Process(q, 1)
