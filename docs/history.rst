@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.4.0 (2018-01-27)
+------------------
+- Essentially an API rewrite on what consumers are and how they consume.
+
 0.3.0 (2018-01-25)
 ------------------
 - Added queue results.
