@@ -61,7 +61,7 @@ Callable classes can also be used as consumers.
 
 Cross-Pool Communication
 ------------------------
-Consumers put data into other pools.
+Consumers can put data into other pools.
 
 .. literalinclude:: ../examples/cross_pool.py
 
