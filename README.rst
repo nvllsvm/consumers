@@ -15,30 +15,24 @@ Example
 
 .. code:: python
 
-    from consumers import Consumer, Queue
+    from consumers import Pool
 
-    class Concatenator(Consumer):
-        def initialize(self):
-            self.string = ''
 
-        def process(self, letter):
-            self.string += letter
+    def concatenate(letters):
+        return ''.join(letters)
 
-        def shutdown(self):
-            return self.string
 
-    with Queue(Concatenator, quantity=2) as queue:
-        for i in 'abcdef':
-            queue.put(i)
+    with Pool(concatenate, 2) as pool:
+        for letter in 'abcdef':
+            pool.put(letter)
 
-    print(queue.results)
+    print(pool.results)
 
-**Output**
+**Possible Output**
 
 ::
 
-    ['bce', 'adf']
-
+    ('bdf', 'ace')
 
 .. |Version| image:: https://img.shields.io/pypi/v/consumers.svg?
    :target: https://pypi.python.org/pypi/consumers

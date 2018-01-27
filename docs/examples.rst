@@ -1,15 +1,13 @@
 Examples
 ========
 
-First steps
------------
-The job of these consumers are to output their PID and the number they received
-from the queue.
+Multiple Processes
+------------------
+Consumers run in separate processes.
 
-.. literalinclude:: ../examples/first_steps.py
+.. literalinclude:: ../examples/print_pid_and_num.py
 
-The output might look like the following. 
-the queue. Notice how ``2`` appears before ``1``.
+**Possible Output**
 
 ::
 
@@ -20,42 +18,24 @@ the queue. Notice how ``2`` appears before ``1``.
     3324 4
 
 
-If we run it again, we would expect the PIDs to change. However, the order of
-the numbers changed as well. This is normal and inherent to parallel
-processing.
+Getting Results
+---------------
+Consumers can return data the end of execution.
+
+.. literalinclude:: ../examples/concatenate.py
+
+**Possible Output**
 
 ::
 
-    3997 0
-    3998 1
-    3999 2
-    3999 4
-    4000 3
+    ('bc', 'adef')
 
 
-Consumer lifecycle
-------------------
-The goal here is to have each consumer create a string of all the letters it
-has processed. Unlike the previous example, we now require the consumers to
-maintain a state. We also need the ability to access the final state of the
-consumers from the main process.
-
-.. literalinclude:: ../examples/init_shutdown.py
-
-Since we specified a ``quantity`` of two consumers, we will get back two
-results.
-
-::
-
-    ['bc', 'adef']
-
-
-Multiple data
+Multiple Data
 -------------
-Multiple parameters of data can be passed to the consumers as easily a passing
-them to a function. No need to wrap them in an a container object.
+Multiple pieces of data can be queued and consumed with ease.
 
-.. literalinclude:: ../examples/multiple_data.py
+.. literalinclude:: ../examples/print_index_and_letter.py
 
 ::
 
@@ -67,22 +47,29 @@ them to a function. No need to wrap them in an a container object.
     f is at index 5
 
 
-Queue orchestration
--------------------
-This demonstrates consumers adding items to another queue.
+Consumer Classes
+----------------
+Callable classes can also be used as consumers.
 
-.. literalinclude:: ../examples/queue_orchestration.py
+.. literalinclude:: ../examples/class_tag_and_number.py
 
 ::
 
-    INFO:SquareConsumer-1:Square of 0 is 0
-    INFO:SquareConsumer-2:Square of 1 is 1
-    INFO:SumConsumer-1:Processing 1
-    INFO:SumConsumer-1:Processing 0
-    INFO:SquareConsumer-1:Square of 2 is 4
-    INFO:SquareConsumer-2:Square of 3 is 9
-    INFO:SumConsumer-1:Processing 4
-    INFO:SumConsumer-1:Processing 9
-    INFO:SquareConsumer-1:Square of 4 is 16
-    INFO:SumConsumer-1:Processing 16
-    INFO:SumConsumer-1:Sum 30
+    first - 0
+    first - 1
+    first - 2
+    second - 0
+    second - 1
+    second - 2
+
+
+Cross-Pool Communication
+------------------------
+Consumers put data into other pools.
+
+::
+
+    A consumer has finished with a total of 10292214
+    A consumer has finished with a total of 10354035
+    A consumer has finished with a total of 10416304
+    A consumer has finished with a total of 10479197

@@ -1,14 +1,9 @@
 API
 ===
 
-Consumer
---------
-.. autoclass:: consumers.Consumer
-    :members:
-
-Queue
+Pool
 -----
-.. autoclass:: consumers.Queue
+.. autoclass:: consumers.Pool
     :members:
 
 Exceptions
@@ -16,5 +11,5 @@ Exceptions
 .. autoexception:: consumers.ConsumerError
     :members:
 
-.. autoexception:: consumers.QueueError
+.. autoexception:: consumers.PoolError
     :members:
