@@ -7,8 +7,6 @@ Consumers run in separate processes.
 
 .. literalinclude:: ../examples/print_pid_and_num.py
 
-**Possible Output**
-
 ::
 
     3320 0
@@ -23,8 +21,6 @@ Getting Results
 Consumers can return data the end of execution.
 
 .. literalinclude:: ../examples/concatenate.py
-
-**Possible Output**
 
 ::
 
@@ -66,6 +62,8 @@ Callable classes can also be used as consumers.
 Cross-Pool Communication
 ------------------------
 Consumers put data into other pools.
+
+.. literalinclude:: ../examples/cross_pool.py
 
 ::
 

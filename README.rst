@@ -28,8 +28,6 @@ Example
 
     print(pool.results)
 
-**Possible Output**
-
 ::
 
     ('bdf', 'ace')
