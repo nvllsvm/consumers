@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Next
-----
+0.5.0 (2018-01-31)
+------------------
 - Remove ``Pool.start()`` in favor of starting the pool upon Pool
   instantiation.
 - Rename ``Pool.stop()`` to ``Pool.join()``
