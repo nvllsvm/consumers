@@ -5,13 +5,11 @@ Consumers
 
 __all__ = [
     'ConsumerError',
-    'partial',
     'Pool',
     'PoolError'
 ]
 
 import multiprocessing
-import time
 import types
 
 
@@ -60,8 +58,8 @@ class Pool:
     A :py:class:`Pool` is responsible for the lifecycle of separate consumer
     processes and the queue upon which they consume from.
 
-    Can also be used as a context manager to invoke :py:meth:`start` and
-    :py:meth:`stop` at the beginning and end of a context respectively.
+    When used as a context manager, entering the context returns the pool
+    object and exiting invokes its :py:meth:`join` method.
 
     :param type,types.FunctionType consumer:
         The callable which will consume from the pool's queue.
@@ -74,8 +72,7 @@ class Pool:
 
         Both must be callable with a single generator argument. This generator
         can be used to retreive the next item from the queue. It exhausts only
-        when both the queue is empty and the pool has initiated consumer
-        :py:meth:`stop`.
+        after the pool is closed.
 
     :param int quantity:
         The number of consumer processes to create.
@@ -84,21 +81,15 @@ class Pool:
         :py:func:`multiprocessing.cpu_count()`.
     """
 
-    _PROCESS_ALIVE_TIMEOUT = 0.1
-    """Time between loops when checking if all processes are done."""
-
     def __init__(self, consumer, quantity=None):
         self.consumer = consumer
         self.quantity = quantity or multiprocessing.cpu_count()
 
-    def start(self):
-        """Start the consumers.
-
-        Resets :py:attr:`results`.
-
-        :raises consumers.PoolError: The consumers have already been started.
-        """
         self._processes = []
+
+        self._active = True
+        self._closed = False
+        self._terminated = False
 
         self._input_queue = multiprocessing.Queue()
         self._result_queue = multiprocessing.Queue()
@@ -109,45 +100,59 @@ class Pool:
             process.start()
             self._processes.append(process)
 
-    def stop(self):
+    def join(self):
         """
         Block until the pool's queue has drained and consumers have stopped.
 
         Sets :py:attr:`results`.
 
-        :raises consumers.ConsumerError: An unhandled exception was raised
-            in one or more of the consumers while processing.
-        :raises consumers.PoolError: The consumers have already been stopped.
+        :raises consumers.ConsumerError: One or more of the consumers did not
+        cleanly exit.
         """
-        for _ in self._processes:
-            self._input_queue.put(STATUS_DONE)
+        if self._active:
+            self._active = False
 
-        while True:
-            if not any(p.is_alive() for p in self._processes):
-                break
-            time.sleep(self._PROCESS_ALIVE_TIMEOUT)
+            self.close()
 
-        self._result_queue.put(STATUS_DONE)
-        results = []
-        while True:
-            item = self._result_queue.get()
-            if item == STATUS_DONE:
-                break
-            results.append(item['result'])
-        self._results = tuple(results)
+            for process in self._processes:
+                process.join()
+                if process.exitcode:
+                    raise ConsumerError
 
-        consumer_error = False
-        for consumer in self._processes:
-            if consumer.exitcode:
-                consumer_error = True
-        if consumer_error:
-            raise ConsumerError
+            self._result_queue.put(STATUS_DONE)
+            results = []
+            while True:
+                item = self._result_queue.get()
+                if item == STATUS_DONE:
+                    break
+                results.append(item['result'])
+            self._results = tuple(results)
+
+    def close(self):
+        """
+        Prevent any more items from being added into the pool's queue.
+        Consumer processes will exit once the remaining items in the queue
+        have been processed.
+        """
+        if not self._closed:
+            self._closed = True
+            for _ in self._processes:
+                self._input_queue.put(STATUS_DONE)
+            self._input_queue.close()
+
+    def terminate(self):
+        """Terminate the consumer processes."""
+        if self._active:
+            self._active = False
+            for process in self._processes:
+                process.terminate()
+            self._terminated = True
 
     @property
     def results(self):
         """Results from the consumers.
 
-        Only available after :py:meth:`stop` has completed.
+        Only available after :py:meth:`join` has completed.
         Reset upon each :py:meth:`start`.
 
         :returns:
@@ -155,22 +160,23 @@ class Pool:
 
         :raises consumers.PoolError: Results are not available at this time.
         """
-        if not hasattr(self, '_results') or self._results is None:
+        if self._results is None:
             raise PoolError
         return self._results
 
     def put(self, *args):
         """Enqueue all `\*args` as a single item in the queue."""
+        if self._closed or not self._active:
+            raise PoolError
         self._input_queue.put({'args': args})
 
     def __enter__(self):
         """Start the consumers upon entering a runtime context."""
-        self.start()
         return self
 
     def __exit__(self, *args):
         """Cleanup the consumers upon exiting a runtime context."""
-        self.stop()
+        self.join()
 
 
 class ConsumerError(Exception):

@@ -11,12 +11,11 @@ def test_consumer_error():
         raise ValueError
 
     pool = consumers.Pool(failer, 1)
-    pool.start()
     with pytest.raises(consumers.ConsumerError):
-        pool.stop()
+        pool.join()
 
 
-def test_results_before_stop():
+def test_results_before_join():
     with consumers.Pool(lambda x: x, 1) as pool:
         with pytest.raises(consumers.PoolError):
             print(pool.results)
@@ -27,8 +26,7 @@ def test_process_name_function():
         return multiprocessing.current_process().name
 
     pool = consumers.Pool(return_name, 3)
-    pool.start()
-    pool.stop()
+    pool.join()
 
     assert sorted(pool.results) == ['return_name-1',
                                     'return_name-2',
@@ -41,8 +39,7 @@ def test_process_name_type():
             return multiprocessing.current_process().name
 
     pool = consumers.Pool(ReturnName, 3)
-    pool.start()
-    pool.stop()
+    pool.join()
 
     assert sorted(pool.results) == ['ReturnName-1',
                                     'ReturnName-2',
@@ -92,3 +89,51 @@ def test_pool_type():
             pool.put(letter)
 
     assert pool.results[0] == 'a-b-c-d'
+
+
+def test_pool_close():
+    def dummy(items):
+        pass
+
+    pool = consumers.Pool(dummy, 1)
+    pool.put(1)
+    pool.close()
+
+    with pytest.raises(consumers.PoolError):
+        pool.put(1)
+
+
+def test_pool_close_idempotent():
+    def dummy(items):
+        pass
+
+    pool = consumers.Pool(dummy, 1)
+    pool.put(1)
+
+    pool.close()
+    pool.close()
+    pool.close()
+
+
+def test_pool_join_idempotent():
+    def dummy(items):
+        pass
+
+    pool = consumers.Pool(dummy, 1)
+    pool.put(1)
+
+    pool.join()
+    pool.join()
+    pool.join()
+
+
+def test_pool_terminate_idempotent():
+    def dummy(items):
+        pass
+
+    pool = consumers.Pool(dummy, 1)
+    pool.put(1)
+
+    pool.terminate()
+    pool.terminate()
+    pool.terminate()

@@ -10,9 +10,8 @@ def printer(numbers):
 
 
 pool = Pool(printer)
-pool.start()
 
 for number in range(5):
     pool.put(number)
 
-pool.stop()
+pool.join()
