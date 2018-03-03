@@ -107,7 +107,7 @@ class Pool:
         Sets :py:attr:`results`.
 
         :raises consumers.ConsumerError: One or more of the consumers did not
-        cleanly exit.
+            cleanly exit.
         """
         if self._active:
             self._active = False
