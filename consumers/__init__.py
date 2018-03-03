@@ -130,9 +130,9 @@ class Pool:
 
     def close(self):
         """
-        Prevent any more items from being added into the pool's queue.
-        Consumer processes will exit once the remaining items in the queue
-        have been processed.
+        Prevent any more items from being added into the pool's queue and
+        inform consumers to shutdown after the remaining items have been
+        processed. Non-blocking.
         """
         if not self._closed:
             self._closed = True
@@ -150,10 +150,10 @@ class Pool:
 
     @property
     def results(self):
-        """Results from the consumers.
+        """
+        Results from the consumers.
 
         Only available after :py:meth:`join` has completed.
-        Reset upon each :py:meth:`start`.
 
         :returns:
             A :py:class:`tuple` with a size of as many consumers in the pool.
