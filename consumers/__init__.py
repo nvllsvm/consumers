@@ -38,7 +38,9 @@ class _Process(multiprocessing.Process):
                 yield args
 
     def run(self):
-        result = self.pool.consumer(self.get_item())
+        result = self.pool.consumer(self.get_item(),
+                                    *self.pool._args,
+                                    **self.pool._kwargs)
         self.pool._result_queue.put({'result': result})
 
 
@@ -57,6 +59,13 @@ class Pool:
         It continue to yield the next item from the queue until the queue is
         both closed and empty.
 
+        Additional parameters may be specified with `args` and `kwargs`.
+
+    :param tuple args: Positional arguments to pass to the consumer function.
+        Will take position after the generator argument provided by the Pool.
+
+    :param dict kwargs: Keyword arguments to pass to the consumer function.
+
     :param int quantity:
         The number of consumer processes to create.
 
@@ -64,16 +73,16 @@ class Pool:
         :py:func:`multiprocessing.cpu_count()`.
     """
 
-    def __init__(self, consumer, quantity=None):
+    def __init__(self, consumer, quantity=None, args=None, kwargs=None):
         self.consumer = consumer
+        self._args = args or ()
+        self._kwargs = kwargs or {}
         self.quantity = quantity or multiprocessing.cpu_count()
 
         self._processes = []
-
         self._active = True
         self._closed = False
         self._terminated = False
-
         self._input_queue = multiprocessing.Queue()
         self._result_queue = multiprocessing.Queue()
         self._results = None
