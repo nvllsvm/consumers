@@ -10,7 +10,6 @@ __all__ = [
 ]
 
 import multiprocessing
-import types
 
 
 STATUS_DONE = 'done'
@@ -39,12 +38,7 @@ class _Process(multiprocessing.Process):
                 yield args
 
     def run(self):
-        if isinstance(self.pool.consumer, types.FunctionType):
-            consumer = self.pool.consumer
-        else:
-            consumer = self.pool.consumer()
-
-        result = consumer(self.get_item())
+        result = self.pool.consumer(self.get_item())
         self.pool._result_queue.put({'result': result})
 
 
@@ -56,18 +50,12 @@ class Pool:
     When used as a context manager, entering the context returns the pool
     object and exiting invokes its :py:meth:`join` method.
 
-    :param type,types.FunctionType consumer:
-        The callable which will consume from the pool's queue.
+    :param callable consumer:
+        A callable which will consume from the pool's queue.
 
-        If *consumer* is a type, it is instantiated in each of the consumer
-        processes with no parameters. The resulting instance is used as the
-        callable.
-
-        If *consumer* is a function, it is used as-is.
-
-        Both must be callable with a single generator argument. This generator
-        can be used to retreive the next item from the queue. It exhausts only
-        after the pool is closed.
+        A generator will be passed as the first argument of the consumer.
+        It continue to yield the next item from the queue until the queue is
+        both closed and empty.
 
     :param int quantity:
         The number of consumer processes to create.
