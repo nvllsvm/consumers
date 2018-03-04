@@ -19,10 +19,9 @@ STATUS_DONE = 'done'
 
 class _Process(multiprocessing.Process):
 
-    def __init__(self, pool, process_number):
-        super().__init__()
+    def __init__(self, pool, name):
+        super().__init__(name=name)
         self.pool = pool
-        self.process_number = process_number
 
     def get_item(self):
         while True:
@@ -42,12 +41,8 @@ class _Process(multiprocessing.Process):
     def run(self):
         if isinstance(self.pool.consumer, types.FunctionType):
             consumer = self.pool.consumer
-            name = consumer.__name__
         else:
             consumer = self.pool.consumer()
-            name = type(consumer).__name__
-
-        self.name = '{}-{}'.format(name, self.process_number)
 
         result = consumer(self.get_item())
         self.pool._result_queue.put({'result': result})
@@ -95,8 +90,13 @@ class Pool:
         self._result_queue = multiprocessing.Queue()
         self._results = None
 
+        try:
+            base_name = self.consumer.__name__
+        except AttributeError:
+            base_name = 'Consumer'
+
         for process_number in range(1, self.quantity + 1):
-            process = _Process(self, process_number)
+            process = _Process(self, '{}-{}'.format(base_name, process_number))
             process.start()
             self._processes.append(process)
 
