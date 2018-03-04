@@ -7,7 +7,7 @@ Consumers run in separate processes.
 
 .. literalinclude:: ../examples/print_pid_and_num.py
 
-::
+.. code-block:: none
 
     3320 0
     3320 2
@@ -22,7 +22,7 @@ Consumers can return data the end of execution.
 
 .. literalinclude:: ../examples/concatenate.py
 
-::
+.. code-block:: none
 
     ('bc', 'adef')
 
@@ -33,7 +33,7 @@ Multiple pieces of data can be queued and consumed with ease.
 
 .. literalinclude:: ../examples/print_index_and_letter.py
 
-::
+.. code-block:: none
 
     a is at index 0
     c is at index 2
@@ -49,7 +49,7 @@ Consumers can be configured with positional and keyword arguments.
 
 .. literalinclude:: ../examples/consumer_config.py
 
-::
+.. code-block:: none
 
     remote:80 0
     remote:80 1
@@ -65,7 +65,7 @@ Consumers can put data into other pools.
 
 .. literalinclude:: ../examples/cross_pool.py
 
-::
+.. code-block:: none
 
     A consumer has finished with a total of 10292214
     A consumer has finished with a total of 10354035
