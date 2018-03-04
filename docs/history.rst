@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.6.0 (2018-03-03)
+------------------
+- Change consumer to be any callable type.
+- Add consumer arg and kwarg specification.
+- Change consumer process naming.
+
 0.5.0 (2018-01-31)
 ------------------
 - Remove ``Pool.start()`` in favor of starting the pool upon Pool

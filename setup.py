@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='consumers',
-    version='0.5.0',
+    version='0.6.0',
     description='A simple, flexible way to parallelize processing in Python.',
     long_description=open('README.rst').read(),
     author='Andrew Rabert',
@@ -12,7 +12,7 @@ setuptools.setup(
     license='Apache 2.0',
     packages=['consumers'],
     classifiers=(
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3 :: Only'
