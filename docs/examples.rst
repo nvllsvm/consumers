@@ -43,20 +43,20 @@ Multiple pieces of data can be queued and consumed with ease.
     f is at index 5
 
 
-Consumer Classes
-----------------
-Callable classes can also be used as consumers.
+Consumer Configuration
+----------------------
+Consumers can be configured with positional and keyword arguments.
 
-.. literalinclude:: ../examples/class_tag_and_number.py
+.. literalinclude:: ../examples/consumer_config.py
 
 ::
 
-    first - 0
-    first - 1
-    first - 2
-    second - 0
-    second - 1
-    second - 2
+    remote:80 0
+    remote:80 1
+    remote:80 2
+    local:8123 0
+    local:8123 1
+    local:8123 2
 
 
 Cross-Pool Communication
