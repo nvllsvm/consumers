@@ -21,7 +21,7 @@ def test_results_before_join():
             print(pool.results)
 
 
-def test_process_name_function():
+def test_process_name():
     def return_name(_):
         return multiprocessing.current_process().name
 
@@ -33,17 +33,19 @@ def test_process_name_function():
                                     'return_name-3']
 
 
-def test_process_name_type():
-    class ReturnName:
-        def __call__(self, items):
-            return multiprocessing.current_process().name
+def test_process_name_default():
+    def return_name(_):
+        return multiprocessing.current_process().name
 
-    pool = consumers.Pool(ReturnName, 3)
+    # partials do not have __name__
+    func = functools.partial(return_name)
+
+    pool = consumers.Pool(func, 3)
     pool.join()
 
-    assert sorted(pool.results) == ['ReturnName-1',
-                                    'ReturnName-2',
-                                    'ReturnName-3']
+    assert sorted(pool.results) == ['Consumer-1',
+                                    'Consumer-2',
+                                    'Consumer-3']
 
 
 def test_items_generator():
@@ -64,7 +66,7 @@ def test_items_generator():
     assert pool.results[0] == expected
 
 
-def test_pool_function():
+def test_pool():
     def concatenate(items):
         return ''.join(items)
 
@@ -75,20 +77,19 @@ def test_pool_function():
     assert pool.results[0] == 'abcd'
 
 
-def test_pool_type():
-    class Separator:
-        def __init__(self, separator):
-            self.separator = separator
+def test_pool_args_kwargs():
+    def concatenate(items, a, b, c, d):
+        data = [str(v) for v in (a, b, c, d)]
+        data.extend(items)
+        return ''.join(data)
 
-        def __call__(self, items):
-            return self.separator.join(items)
-
-    partial = functools.partial(Separator, '-')
-    with consumers.Pool(partial, 1) as pool:
+    args = (1, 2)
+    kwargs = {'c': 3, 'd': 4}
+    with consumers.Pool(concatenate, 1, args=args, kwargs=kwargs) as pool:
         for letter in 'abcd':
             pool.put(letter)
 
-    assert pool.results[0] == 'a-b-c-d'
+    assert pool.results[0] == '1234abcd'
 
 
 def test_pool_close():
