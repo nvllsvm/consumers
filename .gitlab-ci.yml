@@ -1,0 +1,12 @@
+before_script:
+    - python3 setup.py develop
+
+test:3.5:
+    image: python:3.5
+    script:
+    - python3 setup.py test
+
+test:3.6:
+    image: python:3.6
+    script:
+    - python3 setup.py test
