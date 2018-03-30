@@ -1,7 +1,7 @@
 consumers
 =========
 
-|Version| |Status| |License|
+|Version| |License|
 
 Consumers is a simple, flexible way to parallelize processing in Python.
 
@@ -34,9 +34,6 @@ Example
 
 .. |Version| image:: https://img.shields.io/pypi/v/consumers.svg?
    :target: https://pypi.python.org/pypi/consumers
-
-.. |Status| image:: https://img.shields.io/travis/nvllsvm/consumers.svg?
-   :target: https://travis-ci.org/nvllsvm/consumers
 
 .. |License| image:: https://img.shields.io/github/license/nvllsvm/consumers.svg?
    :target: https://github.com/nvllsvm/consumers/blob/master/LICENSE
