@@ -2,6 +2,12 @@ import sys
 
 import setuptools
 
+if 'test' in sys.argv:
+    setup_requires = ['pytest-runner']
+elif 'build_sphinx' in sys.argv:
+    setup_requires = ['sphinx', 'sphinx_rtd_theme']
+else:
+    setup_requires = []
 
 setuptools.setup(
     name='consumers',
@@ -19,7 +25,7 @@ setuptools.setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3 :: Only'
     ),
-    setup_requires=['pytest-runner'] if 'test' in sys.argv else [],
+    setup_requires=setup_requires,
     tests_require=['pytest', 'pytest-cov'],
     zip_safe=True
 )

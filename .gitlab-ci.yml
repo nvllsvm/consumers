@@ -10,3 +10,8 @@ test:3.6:
     image: python:3.6
     script:
     - python3 setup.py test
+
+test:docs:
+    image: python:3
+    script:
+    - python3 setup.py build_sphinx
