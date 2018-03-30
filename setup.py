@@ -1,3 +1,5 @@
+import sys
+
 import setuptools
 
 
@@ -17,7 +19,7 @@ setuptools.setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3 :: Only'
     ),
-    setup_requires=['pytest-runner'],
+    setup_requires=['pytest-runner'] if 'test' in sys.argv else [],
     tests_require=['pytest', 'pytest-cov'],
     zip_safe=True
 )
