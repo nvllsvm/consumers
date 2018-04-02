@@ -56,8 +56,8 @@ class Pool:
         A callable which will consume from the pool's queue.
 
         A generator will be passed as the first argument of the consumer.
-        It continue to yield the next item from the queue until the queue is
-        both closed and empty.
+        It will continue to yield the next item from the queue until the queue
+        is both closed and empty.
 
         Additional parameters may be specified with `args` and `kwargs`.
 
