@@ -11,7 +11,7 @@ else:
 
 setuptools.setup(
     name='consumers',
-    version='0.6.0',
+    version='0.6.1',
     description='A simple, flexible way to parallelize processing in Python.',
     long_description=open('README.rst').read(),
     author='Andrew Rabert',

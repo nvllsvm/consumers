@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.6.1 (2018-04-02)
+------------------
+- Fix documentation.
+
 0.6.0 (2018-03-03)
 ------------------
 - Change consumer to be any callable type.
