@@ -28,6 +28,8 @@ Example
 
     print(pool.results)
 
+**Results**
+
 ::
 
     ('bdf', 'ace')
