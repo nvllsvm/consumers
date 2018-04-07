@@ -19,7 +19,7 @@ Example
 
 
     def concatenate(letters):
-        return ''.join(letters)
+        return '-'.join(letters)
 
 
     with Pool(concatenate, 2) as pool:
@@ -30,7 +30,7 @@ Example
 
 ::
 
-    ('bdf', 'ace')
+    ('b-d-f', 'a-c-e')
 
 .. |Version| image:: https://img.shields.io/pypi/v/consumers.svg?
    :target: https://pypi.org/project/consumers/

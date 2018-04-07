@@ -24,7 +24,7 @@ Consumers can return data the end of execution.
 
 .. code-block:: none
 
-    ('bc', 'adef')
+    ('b-c', 'a-d-e-f')
 
 
 Multiple Data

@@ -2,7 +2,7 @@ from consumers import Pool
 
 
 def concatenate(letters):
-    return ''.join(letters)
+    return '-'.join(letters)
 
 
 with Pool(concatenate, quantity=2) as pool:
