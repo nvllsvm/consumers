@@ -28,14 +28,12 @@ Example
 
     print(pool.results)
 
-**Results**
-
 ::
 
     ('bdf', 'ace')
 
 .. |Version| image:: https://img.shields.io/pypi/v/consumers.svg?
-   :target: https://pypi.python.org/pypi/consumers
+   :target: https://pypi.org/project/consumers/
 
 .. |License| image:: https://img.shields.io/github/license/nvllsvm/consumers.svg?
    :target: https://github.com/nvllsvm/consumers/blob/master/LICENSE
