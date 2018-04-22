@@ -15,7 +15,7 @@ setuptools.setup(
     description='A simple, flexible way to parallelize processing in Python.',
     long_description=open('README.rst').read(),
     author='Andrew Rabert',
-    author_email='arabert@nullsum.net',
+    author_email='ar@nullsum.net',
     url='https://github.com/nvllsvm/consumers',
     license='Apache 2.0',
     packages=['consumers'],
